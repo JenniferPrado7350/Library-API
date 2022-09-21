@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -32,7 +34,7 @@ public class BookRepositoryTest {
 
                 //ja que o @DataJpaTest vai sempre limpar a base de dados quando o teste acabar de rodar
                 //vamos criar um objeto book que vai persistir, nao sera apagado
-        Book book = Book.builder().title("Aventuras").author("Fulano").isbn(isbn).build();
+        Book book = createNewBook(isbn);
         entityManager.persist(book); //metodo persist serve para persistir uma entidade
 
         //execucao
@@ -42,6 +44,10 @@ public class BookRepositoryTest {
         //verificacao
 
         assertThat(exists).isTrue(); //verifica se o valor de exists é verdadeiro, se for falso vai acusar erro
+    }
+
+    private Book createNewBook(String isbn) {
+        return Book.builder().title("Aventuras").author("Fulano").isbn(isbn).build();
     }
 
     @Test
@@ -59,4 +65,43 @@ public class BookRepositoryTest {
 
         assertThat(exists).isFalse(); //verifica se o valor de exists é verdadeiro, se for falso vai acusar erro
     }
+
+    @Test
+    @DisplayName("Deve obter um livro por id")
+    public void findByIdTest(){
+        //cenario
+        Book book = createNewBook("123");
+        entityManager.persist(book);
+
+        //execucao
+        Optional<Book> foundBook = repository.findById(book.getId());
+
+        //verificacao
+        assertThat(foundBook.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Deve salvar um livro")
+    public void saveBookTest(){
+
+        Book book = createNewBook("123");
+
+        Book savedBook = repository.save(book);
+        assertThat(savedBook.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Deve deletar um livro")
+    public void deleteBookTest(){
+        Book book = createNewBook("123");
+        entityManager.persist(book); //metodo persist serve para persistir uma entidade
+
+        Book foundBook = entityManager.find(Book.class, book.getId());
+
+        repository.delete(foundBook);
+
+        Book deletedBook = entityManager.find(Book.class, book.getId());
+        assertThat(deletedBook).isNull();
+    }
+
 }

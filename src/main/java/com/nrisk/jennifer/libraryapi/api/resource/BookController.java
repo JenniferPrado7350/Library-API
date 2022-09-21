@@ -6,12 +6,18 @@ import com.nrisk.jennifer.libraryapi.exception.BusinessException;
 import com.nrisk.jennifer.libraryapi.model.entity.Book;
 import com.nrisk.jennifer.libraryapi.service.BookService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books") //vai ser a url para as requisicoes
@@ -50,6 +56,51 @@ public class BookController {
                 .build();*/
     }
 
+    @GetMapping("{id}")
+    public BookDTO get(@PathVariable Long id){
+        return service
+                .getById(id)
+                .map( book -> modelMapper.map(book, BookDTO.class) ) //getById vai retornar um book, entao vamos mapear(percorrer) esse book para o BookDTO
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND)); //caso getById nao encontrar um book, lance exception NOT_FOUND
+    }
+
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void  delete(@PathVariable Long id){
+        Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+        service.delete(book);
+    }
+
+    @PutMapping("{id}")
+    public BookDTO update(@PathVariable Long id, BookDTO dto){
+        /*Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
+        book.setAuthor(dto.getAuthor());
+        book.setTitle(dto.getTitle());
+        book = service.update(book);
+        return modelMapper.map(book, BookDTO.class);
+
+        O CODIGO ACIMA FOI REFATORADO E TRANSFORMOU-SE NO CODIGO ABAIXO
+        */
+        return service.getById(id).map(book ->{ //quando encontrar o livro por id, ele vai atualizando as informacoes title author
+            book.setAuthor(dto.getAuthor());
+            book.setTitle(dto.getTitle());
+            book = service.update(book);  //servico vai atualizar na base
+            return modelMapper.map(book, BookDTO.class); // depois mapeia para o dto, transforma para o dto que tem que retornar
+
+        }).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) ); //caso contrario, retorna NOT_FOUND
+
+    }
+
+    @GetMapping
+    public Page<BookDTO> find(BookDTO dto, Pageable pageRequest){
+        Book filter = modelMapper.map(dto, Book.class);
+        Page<Book> result = service.find(filter, pageRequest);
+        List<BookDTO> list = result.getContent().stream()
+                .map(entity -> modelMapper.map(entity, BookDTO.class))
+                .collect(Collectors.toList());
+
+        return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
+    }
     @ExceptionHandler(MethodArgumentNotValidException.class) ///toda vez que essa classe receber a exception MethodArgumentNotValidException(erro de validação), vai ser executado o metodo abaixo
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErros handleValidationExceptions(MethodArgumentNotValidException  ex) { // a exception MethodArgumentNotValidException vai ser lançada toda vez em que ele tentar validar um objeto, com o @Valid e o objeto não esta valido
