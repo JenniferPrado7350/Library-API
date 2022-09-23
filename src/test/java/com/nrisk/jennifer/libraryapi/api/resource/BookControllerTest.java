@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class) //estamos dizendo que o spring deve criar um mini contexto para rodar o test
 @ActiveProfiles("test") //para rodar com perfil de teste e ter configurações que vao rodar apenas no ambiente de teste
-@WebMvcTest //vamos fzr apenas testes unitários e não de integração, então vai testar apenas o comportamento da api
+@WebMvcTest(controllers = BookController.class) //vamos fzr apenas testes unitários e não de integração, então vai testar apenas o comportamento da api
 @AutoConfigureMockMvc //springboot vai fzr uma configuração no teste,onde vai configurar um objeto para que possamos fazer as requisições
 public class BookControllerTest {
 

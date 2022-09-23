@@ -101,16 +101,5 @@ public class BookController {
 
         return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
     }
-    @ExceptionHandler(MethodArgumentNotValidException.class) ///toda vez que essa classe receber a exception MethodArgumentNotValidException(erro de validação), vai ser executado o metodo abaixo
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErros handleValidationExceptions(MethodArgumentNotValidException  ex) { // a exception MethodArgumentNotValidException vai ser lançada toda vez em que ele tentar validar um objeto, com o @Valid e o objeto não esta valido
-        BindingResult bindingResult = ex.getBindingResult(); //BindingResult é o resultado da validação que ocorreu durante a validação do objeto com a anotations @Valid
-        return  new ApiErros(bindingResult);
-    }
 
-    @ExceptionHandler(BusinessException.class)// sempre que acontecer uma  BusinessException vai ser executado o metodo abaixo
-    @ResponseStatus(HttpStatus.BAD_REQUEST) //precisa retornar  o BAD_REQUEST
-    public ApiErros handleBusinessException(BusinessException ex){  // a exception BusinessException vai ser lançada toda vez em que ele tentar salvar outro livro que ja exista
-        return  new ApiErros(ex);
-    }
 }
