@@ -205,4 +205,20 @@ public class BookServiceTest {
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
     }
+
+    @Test
+    @DisplayName("Deve obter um livro pelo isbn")
+    public void getBookByIsbnTest(){
+        String isbn = "1230";
+
+        Mockito.when(repository.findByIsbn(isbn)).thenReturn(Optional.of(Book.builder().id(1l).isbn(isbn).build()));  //quando procurar na base o livro, vamos simular que ele retornou o livro
+
+        Optional<Book> book = service.getBookByIsbn(isbn);
+
+        assertThat(book.isPresent()).isTrue(); //verifica se ha um livro
+        assertThat(book.get().getId()).isEqualTo(1l); //verifica se o id de book é igual a 1
+        assertThat(book.get().getIsbn()).isEqualTo(isbn); //verifica se o isbn de book é igual a  isbn do parametro
+
+        Mockito.verify(repository, Mockito.times(1)).findByIsbn(isbn); //verifica se repository chamou o metodo findByIsbn uma vez
+    }
 }
