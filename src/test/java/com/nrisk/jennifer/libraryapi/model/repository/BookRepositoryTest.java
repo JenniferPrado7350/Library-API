@@ -46,7 +46,7 @@ public class BookRepositoryTest {
         assertThat(exists).isTrue(); //verifica se o valor de exists é verdadeiro, se for falso vai acusar erro
     }
 
-    private Book createNewBook(String isbn) {
+    public static Book createNewBook(String isbn) {
         return Book.builder().title("Aventuras").author("Fulano").isbn(isbn).build();
     }
 

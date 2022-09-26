@@ -6,6 +6,7 @@ import com.nrisk.jennifer.libraryapi.api.dto.BookDTO;
 import com.nrisk.jennifer.libraryapi.exception.BusinessException;
 import com.nrisk.jennifer.libraryapi.model.entity.Book;
 import com.nrisk.jennifer.libraryapi.service.BookService;
+import com.nrisk.jennifer.libraryapi.service.LoanService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ public class BookControllerTest {
     @MockBean //VAI CRIAR UMAS INSTANCIA MOCKADA DA CLASSE
     BookService service;
     private BookService service1;
+
+    @MockBean
+    LoanService loanService;
 
     @Test
     @DisplayName("Deve criar um livro com sucesso") //vamos definir o que o metodo abaixo vai testar

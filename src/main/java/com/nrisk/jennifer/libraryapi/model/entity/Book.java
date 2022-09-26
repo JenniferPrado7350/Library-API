@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.ws.rs.ext.ParamConverter;
+import java.util.List;
 
 @Data //alem do @Getter e @Setter, ele cria tambem o @ToString e @EqualsAndHashCode
 @Builder
@@ -26,4 +28,7 @@ public class Book {
     private String author;
     @Column
     private String isbn;
+
+    @OneToMany(mappedBy = "book") //relacao 1 para muitos onde o relacionamento sera da propriedade book que esta na entidade Loan, ou seja, 1 livro para muitos emprestimos
+    private List<Loan> loans;
 }

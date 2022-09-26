@@ -1,10 +1,14 @@
 package com.nrisk.jennifer.libraryapi.api.resource;
 
 import com.nrisk.jennifer.libraryapi.api.dto.BookDTO;
+import com.nrisk.jennifer.libraryapi.api.dto.LoanDTO;
 import com.nrisk.jennifer.libraryapi.api.exception.ApiErros;
 import com.nrisk.jennifer.libraryapi.exception.BusinessException;
 import com.nrisk.jennifer.libraryapi.model.entity.Book;
+import com.nrisk.jennifer.libraryapi.model.entity.Loan;
 import com.nrisk.jennifer.libraryapi.service.BookService;
+import com.nrisk.jennifer.libraryapi.service.LoanService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,14 +25,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books") //vai ser a url para as requisicoes
+@RequiredArgsConstructor //com o final nos atributos, nao precisamos de um construtor
 public class BookController {
 
-    private BookService service;
-    private ModelMapper modelMapper; //é uma biblioteca que mapeia uma classe, uma instancia dela e transforma em uma classe DTO
-    public BookController(BookService service, ModelMapper mapper) {
-        this.service = service;
-        this.modelMapper = mapper;
-    }
+    private final BookService service;
+    private final ModelMapper modelMapper; //é uma biblioteca que mapeia uma classe, uma instancia dela e transforma em uma classe DTO
+    private final LoanService loanService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -101,5 +103,23 @@ public class BookController {
 
         return new PageImpl<BookDTO>(list, pageRequest, result.getTotalElements());
     }
+
+    @GetMapping("{id}/loans")
+    public Page<LoanDTO> loansByBook(@PathVariable Long id, Pageable pageable){ //vai retornar uma pagina
+        Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Page<Loan> result = loanService.getLoansByBook(book, pageable);
+        List<LoanDTO> list = result.getContent()
+                .stream()
+                .map(loan -> { //vamos mapear loan
+                    Book loanBook = loan.getBook(); //pegando o book salvo em loan(emprestimo)
+                    BookDTO bookDTO = modelMapper.map(loanBook, BookDTO.class); //convertendo o book do tipo Book que estava salvo em loan no tipo BookDTO
+                    LoanDTO loanDTO = modelMapper.map(loan, LoanDTO.class);     //convertendo o loan do tipo Loan no tipo LoanDTO
+                    loanDTO.setBook(bookDTO); //guardando novamente o book, agora no tipo BookDTO, no objeto loan, que agora é do tipo LoanDTO
+                    return loanDTO;
+                }).collect(Collectors.toList());//vai coletar o conteudo da string para uma lista
+
+        return new PageImpl<LoanDTO>(list, pageable, result.getTotalElements());
+    }
+
 
 }

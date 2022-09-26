@@ -10,4 +10,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {//JpaReposito
 
     Optional<Book> findByIsbn(String isbn); // vai procurar um livro pelo isbn. Ele ja faz isso automaticamente, devido a palavra find
     // o Optional significa que ele pode retornar o objeto ou n, pois o objeto pode nao existir, ao inves de verificar se o objeto ta nulo, só verificamos se ele esta copulado
+
 }
