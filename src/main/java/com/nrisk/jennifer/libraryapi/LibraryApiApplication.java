@@ -37,6 +37,7 @@ public class LibraryApiApplication {
 //		};
 //	}
 
+	//ao executar, abra na pagina http://localhost:8080/swagger-ui/index.html para visualizar os Swagger
 	public static void main(String[] args) {
 		SpringApplication.run(LibraryApiApplication.class, args);
 	}
