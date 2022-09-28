@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class BookController {
 
     private final BookService service;
     private final ModelMapper modelMapper; //é uma biblioteca que mapeia uma classe, uma instancia dela e transforma em uma classe DTO
+
     private final LoanService loanService;
 
     @PostMapping
@@ -95,7 +97,7 @@ public class BookController {
 
     @PutMapping("{id}")
     @ApiOperation("UPDATES A BOOK")
-    public BookDTO update(@PathVariable Long id, BookDTO dto){
+    public BookDTO update(@PathVariable Long id, @RequestBody @Valid BookDTO dto){
         //log do actuator:
         //log.info("updating book of id: {}", id);
 

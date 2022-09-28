@@ -49,7 +49,6 @@ public class BookControllerTest {
 
     @MockBean //VAI CRIAR UMAS INSTANCIA MOCKADA DA CLASSE
     BookService service;
-    private BookService service1;
 
     @MockBean
     LoanService loanService;
