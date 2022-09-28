@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,17 +31,20 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/books") //vai ser a url para as requisicoes
 @Api("Book API")
-//@RequiredArgsConstructor //com o final nos atributos, nao precisamos de um construtor
+@RequiredArgsConstructor //com o final nos atributos, nao precisamos de um construtor
+@Slf4j //para usar os logs do actuator
 public class BookController {
 
-    private BookService service;
-    private ModelMapper modelMapper; //é uma biblioteca que mapeia uma classe, uma instancia dela e transforma em uma classe DTO
-    private LoanService loanService;
+    private final BookService service;
+    private final ModelMapper modelMapper; //é uma biblioteca que mapeia uma classe, uma instancia dela e transforma em uma classe DTO
+    private final LoanService loanService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation("CREATE A BOOK") // Vai ser uma explicacao sobre o que essa requisicao faz, aparece no Swagger
     public BookDTO create(@RequestBody @Valid BookDTO dto){ //RequestBody vai fzr com que o json enviado como corpo da requisição seja convertido nesse dto, @Valid vai fazer com que o springBoot valide o objeto dto com base nas anotations @NotEmpty dos atributos da classe BookDTO
+        //log do actuator:
+        //log.info("creating a book for isbn: {}", dto.getIsbn());
         Book entity = modelMapper.map( dto, Book.class); //vai pegar a instancia dto, vai criar uma instancia de Book e vai transferir todas as propriedades de mesmo nome, entre a instancia dto e a classe Book, para a instancia criada da classe Book
 
        /* O codigo a seguir é o mesmo que o codigo acima, porem o cod acima foi refatorado
@@ -67,6 +71,8 @@ public class BookController {
     @GetMapping("{id}")
     @ApiOperation("OBTAINS A BOOK DETAILS BY ID")
     public BookDTO get(@PathVariable Long id){
+        //log do actuator:
+        //log.info("obtaining details for book id: {}", id);
         return service
                 .getById(id)
                 .map( book -> modelMapper.map(book, BookDTO.class) ) //getById vai retornar um book, entao vamos mapear(percorrer) esse book para o BookDTO
@@ -80,6 +86,9 @@ public class BookController {
             @ApiResponse(code = 204, message = "Book succesfully deleted")  //isso faz com que ao inves de mostrar codigo OK quando deletar o livro, ele mostre a mensagem  "Book succesfully deleted" no Swagger
     })
     public void  delete(@PathVariable Long id){
+        //log do actuator:
+        //log.info("deleting book of id: {}", id);
+
         Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
         service.delete(book);
     }
@@ -87,6 +96,9 @@ public class BookController {
     @PutMapping("{id}")
     @ApiOperation("UPDATES A BOOK")
     public BookDTO update(@PathVariable Long id, BookDTO dto){
+        //log do actuator:
+        //log.info("updating book of id: {}", id);
+
         /*Book book = service.getById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND) );
         book.setAuthor(dto.getAuthor());
         book.setTitle(dto.getTitle());
